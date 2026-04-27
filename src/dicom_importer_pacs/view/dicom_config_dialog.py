@@ -4,34 +4,29 @@ from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QDialog,
     QFormLayout,
-    QLabel,
     QLineEdit,
     QPushButton,
     QVBoxLayout,
 )
 
-from dicom_importer_pacs.config.settings import AeConfig, AppSettings
+from dicom_importer_pacs.config.settings import AppSettings
 
 
-class ServerConfigDialog(QDialog):
+class DicomConfigDialog(QDialog):
     def __init__(self, settings: AppSettings, parent=None) -> None:
         super().__init__(parent)
-        self.setWindowTitle("Server Configuration")
+        self.setWindowTitle("DICOM Configuration")
         self.setModal(True)
-        self.resize(500, 300)
+        self.resize(500, 250)
 
-        self.local_ae = QLineEdit(settings.ae.local_ae_title)
-        self.local_port = QLineEdit(str(settings.ae.local_port))
-        self.remote_ae = QLineEdit(settings.ae.pacs_ae_title)
-        self.remote_host = QLineEdit(settings.ae.pacs_host)
-        self.remote_port = QLineEdit(str(settings.ae.pacs_port))
+        self.max_name_len = QLineEdit(str(settings.max_name_len))
+        self.max_acc_len = QLineEdit(str(settings.max_accession_len))
+        self.max_desc_len = QLineEdit(str(settings.max_study_desc_len))
 
         form = QFormLayout()
-        form.addRow("Local AE Title", self.local_ae)
-        form.addRow("Local Port", self.local_port)
-        form.addRow("PACS AE Title", self.remote_ae)
-        form.addRow("PACS Host", self.remote_host)
-        form.addRow("PACS Port", self.remote_port)
+        form.addRow("Max Patient Name Length", self.max_name_len)
+        form.addRow("Max Accession Length", self.max_acc_len)
+        form.addRow("Max Study Description Length", self.max_desc_len)
 
         btn_ok = QPushButton("OK")
         btn_cancel = QPushButton("Cancel")
@@ -79,17 +74,12 @@ class ServerConfigDialog(QDialog):
             """
         )
 
-    def get_settings(self) -> AeConfig:
+    def get_settings(self) -> tuple[int, int, int]:
         try:
-            local_port = int(self.local_port.text())
-            port = int(self.remote_port.text())
+            max_name_len = int(self.max_name_len.text())
+            max_acc_len = int(self.max_acc_len.text())
+            max_desc_len = int(self.max_desc_len.text())
         except ValueError as exc:
-            raise ValueError("Port must be integers") from exc
+            raise ValueError("Max lengths must be integers") from exc
 
-        return AeConfig(
-            local_ae_title=self.local_ae.text().strip() or "DICOMIMPORTER",
-            local_port=local_port,
-            pacs_ae_title=self.remote_ae.text().strip() or "PACS",
-            pacs_host=self.remote_host.text().strip() or "127.0.0.1",
-            pacs_port=port,
-        )
+        return (max_name_len, max_acc_len, max_desc_len)

@@ -30,13 +30,14 @@ class MainWindow(QMainWindow):
     import_folder_clicked = Signal()
     send_clicked = Signal()
     server_config_clicked = Signal()
+    dicom_config_clicked = Signal()
 
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("DICOM Importer to PACS")
         self.resize(1366, 860)
 
-        # Setup menu bar with File and Server menus
+        # Setup menu bar with File, Server, and DICOM menus
         menubar = self.menuBar()
         menubar.setNativeMenuBar(True)
         
@@ -48,6 +49,10 @@ class MainWindow(QMainWindow):
         server_menu = menubar.addMenu("Server")
         config_action = server_menu.addAction("Server Config...")
         config_action.triggered.connect(self.server_config_clicked.emit)
+        
+        dicom_menu = menubar.addMenu("DICOM")
+        dicom_config_action = dicom_menu.addAction("DICOM Config...")
+        dicom_config_action.triggered.connect(self.dicom_config_clicked.emit)
 
         root = QWidget()
         self.setCentralWidget(root)

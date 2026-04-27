@@ -11,6 +11,7 @@ from dicom_importer_pacs.services.import_service import ImportOptions, ImportSer
 from dicom_importer_pacs.utils.drive_utils import list_cdrom_roots
 from dicom_importer_pacs.view.main_window import MainWindow
 from dicom_importer_pacs.view.server_config_dialog import ServerConfigDialog
+from dicom_importer_pacs.view.dicom_config_dialog import DicomConfigDialog
 
 
 class MainController:
@@ -26,6 +27,7 @@ class MainController:
         self.view.import_dvd_clicked.connect(self.on_import_dvd)
         self.view.send_clicked.connect(self.on_send)
         self.view.server_config_clicked.connect(self.on_server_config)
+        self.view.dicom_config_clicked.connect(self.on_dicom_config)
 
     def _load_from_root(self, root: Path) -> None:
         try:
@@ -54,10 +56,22 @@ class MainController:
     def on_server_config(self) -> None:
         dialog = ServerConfigDialog(self.settings, self.view)
         if dialog.exec() == QDialog.Accepted:
-            self.settings = dialog.get_settings()
+            ae = dialog.get_settings()
+            self.settings.ae = ae
             save_settings(self.settings)
             self.import_service = ImportService(self.settings)
             self.view.log("Server configuration saved")
+
+    def on_dicom_config(self) -> None:
+        dialog = DicomConfigDialog(self.settings, self.view)
+        if dialog.exec() == QDialog.Accepted:
+            max_name_len, max_acc_len, max_desc_len = dialog.get_settings()
+            self.settings.max_name_len = max_name_len
+            self.settings.max_accession_len = max_acc_len
+            self.settings.max_study_desc_len = max_desc_len
+            save_settings(self.settings)
+            self.import_service = ImportService(self.settings)
+            self.view.log("DICOM configuration saved")
 
     def _on_progress(self, idx: int, total: int, message: str) -> None:
         self.view.update_progress(idx, total, message)
