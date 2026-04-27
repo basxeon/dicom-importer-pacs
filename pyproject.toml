@@ -1,0 +1,11 @@
+[project]
+name = "dicom-importer-pacs"
+version = "0.1.0"
+description = "DICOM importer from DVD/CD or folder to PACS via C-STORE"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
