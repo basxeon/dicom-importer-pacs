@@ -10,6 +10,7 @@ from dicom_importer_pacs.model.entities import StudyRecord, TagOverrides
 from dicom_importer_pacs.services.import_service import ImportOptions, ImportService
 from dicom_importer_pacs.utils.drive_utils import list_cdrom_roots
 from dicom_importer_pacs.view.main_window import MainWindow
+from dicom_importer_pacs.view.server_config_dialog import ServerConfigDialog
 
 
 class MainController:
@@ -24,7 +25,7 @@ class MainController:
         self.view.import_folder_clicked.connect(self.on_import_folder)
         self.view.import_dvd_clicked.connect(self.on_import_dvd)
         self.view.send_clicked.connect(self.on_send)
-        self.view.save_config_clicked.connect(self.on_save_config)
+        self.view.server_config_clicked.connect(self.on_server_config)
 
     def _load_from_root(self, root: Path) -> None:
         try:
@@ -50,11 +51,13 @@ class MainController:
             return
         self._load_from_root(roots[0])
 
-    def on_save_config(self) -> None:
-        self.settings = self.view.collect_settings()
-        save_settings(self.settings)
-        self.import_service = ImportService(self.settings)
-        self.view.log("Configuration saved")
+    def on_server_config(self) -> None:
+        dialog = ServerConfigDialog(self.settings, self.view)
+        if dialog.exec() == dialog.Accepted:
+            self.settings = dialog.get_settings()
+            save_settings(self.settings)
+            self.import_service = ImportService(self.settings)
+            self.view.log("Server configuration saved")
 
     def _on_progress(self, idx: int, total: int, message: str) -> None:
         self.view.update_progress(idx, total, message)
@@ -65,16 +68,12 @@ class MainController:
             return
 
         try:
-            settings = self.view.collect_settings()
-            self.settings = settings
-            self.import_service = ImportService(self.settings)
-
-            overrides_by_study = self.view.collect_overrides()
             options = ImportOptions(
                 regenerate_uid=self.view.regenerate_uid_enabled(),
                 demographic_mode=self.view.demographic_mode_enabled(),
             )
 
+            overrides_by_study = self.view.collect_overrides()
             self.import_service.import_to_pacs(
                 self.studies,
                 overrides_by_study,

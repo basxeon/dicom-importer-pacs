@@ -4,15 +4,13 @@ from PySide6.QtCore import Signal
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QCheckBox,
-    QFormLayout,
     QFrame,
-    QGridLayout,
-    QGroupBox,
     QHBoxLayout,
     QHeaderView,
     QLabel,
-    QLineEdit,
     QMainWindow,
+    QMenu,
+    QMenuBar,
     QMessageBox,
     QPlainTextEdit,
     QProgressBar,
@@ -23,7 +21,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from dicom_importer_pacs.config.settings import AeConfig, AppSettings
+from dicom_importer_pacs.config.settings import AppSettings
 from dicom_importer_pacs.model.entities import StudyRecord, TagOverrides
 
 
@@ -31,12 +29,18 @@ class MainWindow(QMainWindow):
     import_dvd_clicked = Signal()
     import_folder_clicked = Signal()
     send_clicked = Signal()
-    save_config_clicked = Signal()
+    server_config_clicked = Signal()
 
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("DICOM Importer to PACS")
         self.resize(1366, 860)
+
+        # Setup menu bar
+        menubar = self.menuBar()
+        server_menu = menubar.addMenu("Server")
+        config_action = server_menu.addAction("Server Config...")
+        config_action.triggered.connect(self.server_config_clicked.emit)
 
         root = QWidget()
         self.setCentralWidget(root)
@@ -49,7 +53,6 @@ class MainWindow(QMainWindow):
         self.btn_import_dvd = QPushButton("Import from DVD Drive")
         self.btn_import_folder = QPushButton("Import from Folder")
         self.btn_send = QPushButton("Send to PACS")
-        self.btn_save_config = QPushButton("Save Config")
 
         self.chk_regen_uid = QCheckBox("Regenerate Study/Series/SOP UIDs")
         self.chk_demo_mode = QCheckBox("Patient Demography Mode (anonymize selected fields)")
@@ -74,14 +77,6 @@ class MainWindow(QMainWindow):
         self.log_box = QPlainTextEdit()
         self.log_box.setReadOnly(True)
 
-        self.local_ae = QLineEdit()
-        self.remote_ae = QLineEdit()
-        self.remote_host = QLineEdit()
-        self.remote_port = QLineEdit()
-        self.max_name_len = QLineEdit()
-        self.max_acc_len = QLineEdit()
-        self.max_desc_len = QLineEdit()
-
         self._build_layout(root)
         self._wire_events()
         self._apply_modern_style()
@@ -96,31 +91,18 @@ class MainWindow(QMainWindow):
         action_row.addWidget(self.btn_import_dvd)
         action_row.addWidget(self.btn_import_folder)
         action_row.addWidget(self.btn_send)
-        action_row.addWidget(self.btn_save_config)
+        action_row.addStretch()
 
         options_card = QFrame()
         options_card.setObjectName("Card")
         options_layout = QVBoxLayout(options_card)
         options_layout.addWidget(self.chk_regen_uid)
         options_layout.addWidget(self.chk_demo_mode)
-
-        config_group = QGroupBox("AE / PACS Configuration")
-        config_layout = QFormLayout(config_group)
-        config_layout.addRow("Local AE Title", self.local_ae)
-        config_layout.addRow("PACS AE Title", self.remote_ae)
-        config_layout.addRow("PACS Host", self.remote_host)
-        config_layout.addRow("PACS Port", self.remote_port)
-        config_layout.addRow("Max Patient Name Length", self.max_name_len)
-        config_layout.addRow("Max Accession Length", self.max_acc_len)
-        config_layout.addRow("Max Study Description Length", self.max_desc_len)
-
-        body_grid = QGridLayout()
-        body_grid.addWidget(options_card, 0, 0)
-        body_grid.addWidget(config_group, 0, 1)
+        options_layout.addStretch()
 
         main.addLayout(header)
         main.addLayout(action_row)
-        main.addLayout(body_grid)
+        main.addWidget(options_card)
         main.addWidget(self.studies_table)
         main.addWidget(self.progress)
         main.addWidget(self.log_box)
@@ -129,7 +111,6 @@ class MainWindow(QMainWindow):
         self.btn_import_dvd.clicked.connect(self.import_dvd_clicked.emit)
         self.btn_import_folder.clicked.connect(self.import_folder_clicked.emit)
         self.btn_send.clicked.connect(self.send_clicked.emit)
-        self.btn_save_config.clicked.connect(self.save_config_clicked.emit)
 
     def _apply_modern_style(self) -> None:
         self.setFont(QFont("Segoe UI", 10))
@@ -188,35 +169,11 @@ class MainWindow(QMainWindow):
         )
 
     def apply_settings(self, settings: AppSettings) -> None:
-        self.local_ae.setText(settings.ae.local_ae_title)
-        self.remote_ae.setText(settings.ae.pacs_ae_title)
-        self.remote_host.setText(settings.ae.pacs_host)
-        self.remote_port.setText(str(settings.ae.pacs_port))
-        self.max_name_len.setText(str(settings.max_name_len))
-        self.max_acc_len.setText(str(settings.max_accession_len))
-        self.max_desc_len.setText(str(settings.max_study_desc_len))
+        pass
 
     def collect_settings(self) -> AppSettings:
-        try:
-            port = int(self.remote_port.text())
-            max_name_len = int(self.max_name_len.text())
-            max_acc_len = int(self.max_acc_len.text())
-            max_desc_len = int(self.max_desc_len.text())
-        except ValueError as exc:
-            QMessageBox.warning(self, "Config", "Port and max lengths must be integers")
-            raise RuntimeError("Invalid config values") from exc
-
-        return AppSettings(
-            ae=AeConfig(
-                local_ae_title=self.local_ae.text().strip() or "DICOMIMPORTER",
-                pacs_ae_title=self.remote_ae.text().strip() or "PACS",
-                pacs_host=self.remote_host.text().strip() or "127.0.0.1",
-                pacs_port=port,
-            ),
-            max_name_len=max_name_len,
-            max_accession_len=max_acc_len,
-            max_study_desc_len=max_desc_len,
-        )
+        from dicom_importer_pacs.config.settings import load_settings
+        return load_settings()
 
     def set_studies(self, studies: list[StudyRecord]) -> None:
         self.studies_table.setRowCount(len(studies))
