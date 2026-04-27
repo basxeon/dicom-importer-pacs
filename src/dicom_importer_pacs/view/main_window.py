@@ -127,6 +127,22 @@ class MainWindow(QMainWindow):
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
                     stop:0 #f6f9fc, stop:1 #e7eef7);
             }
+            QMenuBar {
+                background: #ffffff;
+                color: #1b2a41;
+                border-bottom: 1px solid #c8d6e5;
+            }
+            QMenuBar::item:selected {
+                background: #e8f0f8;
+            }
+            QMenu {
+                background: #ffffff;
+                color: #1b2a41;
+                border: 1px solid #c8d6e5;
+            }
+            QMenu::item:selected {
+                background: #e8f0f8;
+            }
             QLabel {
                 color: #1b2a41;
             }

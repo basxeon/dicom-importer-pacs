@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide6.QtWidgets import QFileDialog, QMessageBox
+from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox
 
 from dicom_importer_pacs.config.settings import AppSettings, load_settings, save_settings
 from dicom_importer_pacs.model.dicom_model import build_study_records, discover_dicom_files
@@ -53,7 +53,7 @@ class MainController:
 
     def on_server_config(self) -> None:
         dialog = ServerConfigDialog(self.settings, self.view)
-        if dialog.exec() == dialog.Accepted:
+        if dialog.exec() == QDialog.Accepted:
             self.settings = dialog.get_settings()
             save_settings(self.settings)
             self.import_service = ImportService(self.settings)

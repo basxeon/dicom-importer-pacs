@@ -56,11 +56,18 @@ class ServerConfigDialog(QDialog):
             QDialog {
                 background: #f6f9fc;
             }
+            QLabel {
+                color: #1b2a41;
+            }
             QLineEdit {
                 background: #ffffff;
                 border: 1px solid #b8c7d9;
                 border-radius: 6px;
                 padding: 6px;
+                color: #1b2a41;
+            }
+            QLineEdit::placeholder {
+                color: #888888;
             }
             QPushButton {
                 background: #134074;
@@ -68,6 +75,7 @@ class ServerConfigDialog(QDialog):
                 border-radius: 6px;
                 padding: 8px;
                 font-weight: 600;
+                min-width: 60px;
             }
             QPushButton:hover {
                 background: #0b2545;
