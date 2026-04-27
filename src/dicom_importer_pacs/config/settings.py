@@ -12,6 +12,7 @@ CONFIG_FILE = CONFIG_DIR / "settings.json"
 @dataclass(slots=True)
 class AeConfig:
     local_ae_title: str = "DICOMIMPORTER"
+    local_port: int = 11112
     pacs_ae_title: str = "PACS"
     pacs_host: str = "127.0.0.1"
     pacs_port: int = 104
@@ -41,6 +42,7 @@ def load_settings() -> AppSettings:
     ae_raw = raw.get("ae", {})
     ae = AeConfig(
         local_ae_title=ae_raw.get("local_ae_title", "DICOMIMPORTER"),
+        local_port=int(ae_raw.get("local_port", 11112)),
         pacs_ae_title=ae_raw.get("pacs_ae_title", "PACS"),
         pacs_host=ae_raw.get("pacs_host", "127.0.0.1"),
         pacs_port=int(ae_raw.get("pacs_port", 104)),

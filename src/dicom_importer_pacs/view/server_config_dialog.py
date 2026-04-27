@@ -21,6 +21,7 @@ class ServerConfigDialog(QDialog):
         self.resize(500, 300)
 
         self.local_ae = QLineEdit(settings.ae.local_ae_title)
+        self.local_port = QLineEdit(str(settings.ae.local_port))
         self.remote_ae = QLineEdit(settings.ae.pacs_ae_title)
         self.remote_host = QLineEdit(settings.ae.pacs_host)
         self.remote_port = QLineEdit(str(settings.ae.pacs_port))
@@ -30,6 +31,7 @@ class ServerConfigDialog(QDialog):
 
         form = QFormLayout()
         form.addRow("Local AE Title", self.local_ae)
+        form.addRow("Local Port", self.local_port)
         form.addRow("PACS AE Title", self.remote_ae)
         form.addRow("PACS Host", self.remote_host)
         form.addRow("PACS Port", self.remote_port)
@@ -85,6 +87,7 @@ class ServerConfigDialog(QDialog):
 
     def get_settings(self) -> AppSettings:
         try:
+            local_port = int(self.local_port.text())
             port = int(self.remote_port.text())
             max_name_len = int(self.max_name_len.text())
             max_acc_len = int(self.max_acc_len.text())
@@ -95,6 +98,7 @@ class ServerConfigDialog(QDialog):
         return AppSettings(
             ae=AeConfig(
                 local_ae_title=self.local_ae.text().strip() or "DICOMIMPORTER",
+                local_port=local_port,
                 pacs_ae_title=self.remote_ae.text().strip() or "PACS",
                 pacs_host=self.remote_host.text().strip() or "127.0.0.1",
                 pacs_port=port,
