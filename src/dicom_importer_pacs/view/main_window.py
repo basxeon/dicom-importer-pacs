@@ -127,6 +127,9 @@ class MainWindow(QMainWindow):
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
                     stop:0 #f6f9fc, stop:1 #e7eef7);
             }
+            QLabel {
+                color: #1b2a41;
+            }
             QLabel#Title {
                 font-size: 26px;
                 font-weight: 700;
@@ -136,11 +139,20 @@ class MainWindow(QMainWindow):
                 color: #36526b;
                 margin-bottom: 10px;
             }
+            QCheckBox {
+                color: #1b2a41;
+                spacing: 5px;
+            }
+            QCheckBox::indicator {
+                width: 18px;
+                height: 18px;
+            }
             QFrame#Card, QGroupBox {
                 background: rgba(255, 255, 255, 0.92);
                 border: 1px solid #c8d6e5;
                 border-radius: 14px;
                 padding: 10px;
+                color: #1b2a41;
             }
             QGroupBox {
                 font-weight: 600;
@@ -156,10 +168,39 @@ class MainWindow(QMainWindow):
             QPushButton:hover {
                 background: #0b2545;
             }
-            QLineEdit, QPlainTextEdit, QTableWidget {
+            QLineEdit {
                 background: #ffffff;
                 border: 1px solid #b8c7d9;
                 border-radius: 8px;
+                color: #1b2a41;
+                padding: 4px;
+            }
+            QLineEdit::placeholder {
+                color: #888888;
+            }
+            QPlainTextEdit {
+                background: #ffffff;
+                border: 1px solid #b8c7d9;
+                border-radius: 8px;
+                color: #1b2a41;
+            }
+            QTableWidget {
+                background: #ffffff;
+                border: 1px solid #b8c7d9;
+                border-radius: 8px;
+                color: #1b2a41;
+                gridline-color: #e0e0e0;
+            }
+            QTableWidget::item {
+                padding: 4px;
+                color: #1b2a41;
+            }
+            QHeaderView::section {
+                background: #f0f4f8;
+                color: #1b2a41;
+                padding: 4px;
+                border: none;
+                border-bottom: 1px solid #b8c7d9;
             }
             QProgressBar {
                 border: 1px solid #a9bcd0;
@@ -167,6 +208,7 @@ class MainWindow(QMainWindow):
                 text-align: center;
                 background: #f4f7fb;
                 min-height: 24px;
+                color: #1b2a41;
             }
             QProgressBar::chunk {
                 border-radius: 8px;
