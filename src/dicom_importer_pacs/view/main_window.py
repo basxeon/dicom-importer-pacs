@@ -36,8 +36,15 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("DICOM Importer to PACS")
         self.resize(1366, 860)
 
-        # Setup menu bar
+        # Setup menu bar with File and Server menus
         menubar = self.menuBar()
+        menubar.setNativeMenuBar(True)
+        
+        file_menu = menubar.addMenu("File")
+        file_menu.addSeparator()
+        exit_action = file_menu.addAction("Exit")
+        exit_action.triggered.connect(self.close)
+        
         server_menu = menubar.addMenu("Server")
         config_action = server_menu.addAction("Server Config...")
         config_action.triggered.connect(self.server_config_clicked.emit)
