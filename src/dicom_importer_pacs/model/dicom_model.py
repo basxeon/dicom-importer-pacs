@@ -15,8 +15,10 @@ from dicom_importer_pacs.model.entities import StudyRecord, TagOverrides
 def discover_dicom_files(root: Path) -> list[Path]:
     files: list[Path] = []
     for path in root.rglob("*"):
-        if path.is_file() and is_dicom(path):
-            files.append(path)
+        # Skip DICOMDIR and hidden files
+        if path.is_file() and path.name.upper() != "DICOMDIR" and not path.name.startswith("."):
+            if is_dicom(path):
+                files.append(path)
     return files
 
 
