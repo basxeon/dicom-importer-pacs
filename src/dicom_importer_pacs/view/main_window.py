@@ -195,6 +195,8 @@ class MainWindow(QMainWindow):
                 border-radius: 8px;
                 color: #1b2a41;
                 padding: 4px;
+                selection-background-color: #134074;
+                selection-color: #ffffff;
             }
             QLineEdit::placeholder {
                 color: #888888;
@@ -211,10 +213,15 @@ class MainWindow(QMainWindow):
                 border-radius: 8px;
                 color: #1b2a41;
                 gridline-color: #e0e0e0;
+                selection-background-color: #dbe9f6;
+                selection-color: #0b2545;
             }
             QTableWidget::item {
                 padding: 4px;
                 color: #1b2a41;
+            }
+            QTableWidget::item:selected {
+                color: #0b2545;
             }
             QHeaderView::section {
                 background: #f0f4f8;
@@ -234,6 +241,12 @@ class MainWindow(QMainWindow):
             QProgressBar::chunk {
                 border-radius: 8px;
                 background: #3f88c5;
+            }
+            QMessageBox {
+                background: #f6f9fc;
+            }
+            QMessageBox QLabel {
+                color: #1b2a41;
             }
             """
         )

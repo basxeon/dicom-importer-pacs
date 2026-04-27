@@ -5,6 +5,7 @@ from pydicom.dataset import Dataset
 from dicom_importer_pacs.model.dicom_model import (
     apply_tag_overrides,
     copy_to_buffer,
+    normalize_dicom_text,
     regenerate_uids,
     sanitize_for_pacs,
 )
@@ -31,6 +32,27 @@ def test_apply_tag_overrides_updates_fields() -> None:
     assert str(updated.PatientName) == "John Doe"
     assert updated.AccessionNumber == "ACC-123"
     assert updated.StudyDescription == "CT Abdomen"
+
+
+def test_apply_tag_overrides_sets_utf8_charset_for_thai_text() -> None:
+    ds = Dataset()
+    overrides = TagOverrides(patient_name="สมชาย ใจดี")
+
+    updated = apply_tag_overrides(ds, overrides, 64, 32, 64)
+
+    assert str(updated.PatientName) == "สมชาย ใจดี"
+    assert updated.SpecificCharacterSet == "ISO_IR 192"
+
+
+def test_apply_tag_overrides_keeps_existing_charset_when_ascii_only() -> None:
+    ds = Dataset()
+    ds.SpecificCharacterSet = "ISO_IR 100"
+    overrides = TagOverrides(patient_name="John Doe")
+
+    updated = apply_tag_overrides(ds, overrides, 64, 32, 64)
+
+    assert str(updated.PatientName) == "John Doe"
+    assert updated.SpecificCharacterSet == "ISO_IR 100"
 
 
 def test_regenerate_uids_changes_uid_values() -> None:
@@ -62,3 +84,20 @@ def test_copy_to_buffer_copies_files_one_by_one(tmp_path: Path) -> None:
     assert copied[1].exists()
     assert copied[0].read_bytes() == b"abc"
     assert copied[1].read_bytes() == b"def"
+
+
+def test_normalize_dicom_text_recovers_thai_from_cp874_mojibake() -> None:
+    original = "นายสมชาย^ใจดี"
+    mojibake = original.encode("cp874").decode("latin-1")
+
+    normalized = normalize_dicom_text(mojibake)
+
+    assert normalized == original
+
+
+def test_normalize_dicom_text_keeps_english_text() -> None:
+    original = "JOHN^DOE"
+
+    normalized = normalize_dicom_text(original)
+
+    assert normalized == original

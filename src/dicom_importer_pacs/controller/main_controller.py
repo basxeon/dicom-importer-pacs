@@ -21,6 +21,45 @@ class MainController:
         self.import_service = ImportService(self.settings)
         self.studies: list[StudyRecord] = []
 
+    def _show_message(self, icon: QMessageBox.Icon, title: str, text: str) -> None:
+        msg = QMessageBox(self.view)
+        msg.setIcon(icon)
+        msg.setWindowTitle(title)
+        msg.setText(text)
+        msg.setStyleSheet(
+            """
+            QMessageBox {
+                background: #f6f9fc;
+            }
+            QMessageBox QLabel {
+                color: #1b2a41;
+                font-size: 13px;
+                min-width: 260px;
+            }
+            QMessageBox QPushButton {
+                background: #134074;
+                color: #ffffff;
+                border-radius: 8px;
+                padding: 6px 12px;
+                min-width: 72px;
+                font-weight: 600;
+            }
+            QMessageBox QPushButton:hover {
+                background: #0b2545;
+            }
+            """
+        )
+        msg.exec()
+
+    def _show_info(self, title: str, text: str) -> None:
+        self._show_message(QMessageBox.Icon.Information, title, text)
+
+    def _show_warning(self, title: str, text: str) -> None:
+        self._show_message(QMessageBox.Icon.Warning, title, text)
+
+    def _show_error(self, title: str, text: str) -> None:
+        self._show_message(QMessageBox.Icon.Critical, title, text)
+
     def initialize(self) -> None:
         self.view.apply_settings(self.settings)
         self.view.import_folder_clicked.connect(self.on_import_folder)
@@ -38,7 +77,7 @@ class MainController:
             self.view.set_studies(self.studies)
             self.view.log(f"Loaded {len(dicom_files)} DICOM files in {len(self.studies)} studies")
         except Exception as exc:  # noqa: BLE001
-            QMessageBox.critical(self.view, "Import Error", str(exc))
+            self._show_error("Import Error", str(exc))
 
     def on_import_folder(self) -> None:
         folder = QFileDialog.getExistingDirectory(self.view, "Select DICOM Folder")
@@ -49,7 +88,7 @@ class MainController:
     def on_import_dvd(self) -> None:
         roots = list_cdrom_roots()
         if not roots:
-            QMessageBox.warning(self.view, "DVD/CD", "No DVD/CD drive found")
+            self._show_warning("DVD/CD", "No DVD/CD drive found")
             return
         self._load_from_root(roots[0])
 
@@ -78,7 +117,7 @@ class MainController:
 
     def on_send(self) -> None:
         if not self.studies:
-            QMessageBox.information(self.view, "No Data", "Please import DICOM studies first")
+            self._show_info("No Data", "Please import DICOM studies first")
             return
 
         try:
@@ -94,6 +133,6 @@ class MainController:
                 options,
                 self._on_progress,
             )
-            QMessageBox.information(self.view, "Done", "All studies sent to PACS")
+            self._show_info("Done", "All studies sent to PACS")
         except Exception as exc:  # noqa: BLE001
-            QMessageBox.critical(self.view, "Send Error", str(exc))
+            self._show_error("Send Error", str(exc))
